@@ -1,0 +1,27 @@
+describe('Mobile Login Tests', () => {
+    it('should login with valid credentials - Positive Test', async () => {
+        const usernameField = await $('~username');
+        const passwordField = await $('~password');
+        const loginButton = await $('~login');
+
+        await usernameField.setValue('validUser');
+        await passwordField.setValue('validPass');
+        await loginButton.click();
+
+        const successMessage = await $('~success');
+        await expect(successMessage).toBeDisplayed();
+    });
+
+    it('should show error on invalid login - Negative Test', async () => {
+        const usernameField = await $('~username');
+        const passwordField = await $('~password');
+        const loginButton = await $('~login');
+
+        await usernameField.setValue('invalidUser');
+        await passwordField.setValue('invalidPass');
+        await loginButton.click();
+
+        const errorMessage = await $('~error');
+        await expect(errorMessage).toBeDisplayed();
+    });
+});

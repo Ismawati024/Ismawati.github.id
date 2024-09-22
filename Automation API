@@ -1,0 +1,64 @@
+require('dotenv').config();  // To load environment variables from .env
+const axios = require('axios');
+const assert = require('assert');
+
+describe('API Automation with WebdriverIO', () => {
+    const baseURL = 'https://reqres.in/api';
+    let userId = null;  // Store user ID for future requests
+    let token = process.env.TOKEN;  // Ensure token is fetched dynamically, no hard-coding
+
+    // Create a new user (POST)
+    it('should create a new user - Positive Test', async () => {
+        const response = await axios.post(`${baseURL}/users`, {
+            name: 'John Doe',
+            job: 'QA Engineer'
+        });
+        assert.strictEqual(response.status, 201);
+        userId = response.data.id;  // Save user ID for later use
+        console.log('User created with ID:', userId);
+    });
+
+    // Negative Test: Create a user without a required field
+    it('should fail to create a new user with missing fields - Negative Test', async () => {
+        try {
+            await axios.post(`${baseURL}/users`, {
+                job: 'QA Engineer'
+            });
+        } catch (error) {
+            assert.strictEqual(error.response.status, 400);  // Expect bad request
+        }
+    });
+
+    // Get user details (GET)
+    it('should retrieve user details - Positive Test', async () => {
+        const response = await axios.get(`${baseURL}/users/${userId}`);
+        assert.strictEqual(response.status, 200);  // Success
+        assert.strictEqual(response.data.data.id, userId);  // Correct user details
+    });
+
+    // Update user details (PUT)
+    it('should update user details - Positive Test', async () => {
+        const response = await axios.put(`${baseURL}/users/${userId}`, {
+            name: 'John Updated',
+            job: 'Lead QA'
+        });
+        assert.strictEqual(response.status, 200);
+        assert.strictEqual(response.data.name, 'John Updated');  // Verify updated name
+    });
+
+    // Delete user (DELETE)
+    it('should delete the user - Positive Test', async () => {
+        const response = await axios.delete(`${baseURL}/users/${userId}`);
+        assert.strictEqual(response.status, 204);  // No content means successful deletion
+    });
+
+    // Report errors for invalid requests
+    it('should return 404 for non-existent user - Negative Test', async () => {
+        try {
+            await axios.get(`${baseURL}/users/999999`);
+        } catch (error) {
+            assert.strictEqual(error.response.status, 404);  // User not found
+        }
+    });
+});
+
